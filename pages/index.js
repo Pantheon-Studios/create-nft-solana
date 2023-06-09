@@ -17,14 +17,19 @@ export default function Home() {
   const wallet = useWallet();
 
   const fetchNft = async () => {
-    const connection = new Connection(clusterApiUrl("testnet"));
+    // const connection = new Connection(clusterApiUrl("mainnet-beta"));
+    const connection = new Connection("https://api.metaplex.solana.com/");
     const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
 
-    const result = await mx.nfts().create({
-      uri: "https://raw.githubusercontent.com/Coding-and-Crypto/Rust-Solana-Tutorial/master/nfts/mint-nft/assets/example.json",
-      name: "My NFT",
-      sellerFeeBasisPoints: 500, // Represents 5.00%.
-    });
+    const result = await mx.nfts().create(
+      {
+        uri: "https://raw.githubusercontent.com/Coding-and-Crypto/Rust-Solana-Tutorial/master/nfts/mint-nft/assets/example.json",
+        name: "My NFT",
+        sellerFeeBasisPoints: 500, // Represents 5.00%.
+      },
+      { commitment: "finalized" }
+    );
+    console.log(result);
 
     // const signerman = new Keypair();
     // const result = await mx.nfts().create({
