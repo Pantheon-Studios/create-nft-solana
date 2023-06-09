@@ -4,6 +4,7 @@ import {
   Metaplex,
   keypairIdentity,
   bundlrStorage,
+  token,
 } from "@metaplex-foundation/js";
 import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
 import { useState } from "react";
@@ -11,7 +12,10 @@ import { walletAdapterIdentity } from "@metaplex-foundation/js";
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Keypair } from "@solana/web3.js";
-
+import {
+  Metadata,
+  TokenStandard,
+} from "@metaplex-foundation/mpl-token-metadata";
 export default function Home() {
   const [nft, setNft] = useState(null);
   const wallet = useWallet();
@@ -20,16 +24,28 @@ export default function Home() {
     // const connection = new Connection(clusterApiUrl("mainnet-beta"));
     const connection = new Connection("https://api.metaplex.solana.com/");
     const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
-
-    const result = await mx.nfts().create(
+    const createResult = await mx.nfts().create(
       {
         uri: "https://raw.githubusercontent.com/Coding-and-Crypto/Rust-Solana-Tutorial/master/nfts/mint-nft/assets/example.json",
-        name: "My NFT",
-        sellerFeeBasisPoints: 500, // Represents 5.00%.
+        name: "Teri's NFT",
+        sellerFeeBasisPoints: 750,
+        tokenStandard: TokenStandard.ProgrammableNonFungible,
+        tokenOwner: new PublicKey(
+          "2Ne1qr6SxgVciCDHk2p2DZYXYGNvVLqhncPTuSu3CSHa"
+        ),
       },
       { commitment: "finalized" }
     );
-    console.log(result);
+
+    console.log("create result", createResult);
+
+    // const mintResult = await mx.nfts().mint({
+    //   nftOrSft: createResult.nft,
+    //   toOwner: new PublicKey("2Ne1qr6SxgVciCDHk2p2DZYXYGNvVLqhncPTuSu3CSHa"),
+    //   amount: token(1),
+    // });
+
+    // console.log("mint result", mintResult);
 
     // const signerman = new Keypair();
     // const result = await mx.nfts().create({
@@ -44,7 +60,7 @@ export default function Home() {
     //   sellerFeeBasisPoints: 0,
     // });
 
-    setNft(result.nft);
+    setNft(createResult.nft);
   };
   return (
     <div>
