@@ -1,10 +1,51 @@
 {
   "name": "Test NFT #1",
+  "description": "Nft description.",
   "symbol": "TESTC",
-  "description": "A test for our NFT example.",
-  "seller_fee_basis_points": 750,
+  "image": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/640px-SpongeBob_SquarePants_character.svg.png",
   "external_url": "https://example.com/1",
-  "edition": "1",
-  "background_color": "000000",
-  "image": "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/640px-SpongeBob_SquarePants_character.svg.png"
+  "seller_fee_basis_points": 750,
+  "attributes": [
+    {
+      "trait_type": "Gender",
+      "value": "Male"
+    },
+    {
+      "trait_type": "Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "Expression",
+      "value": "Joy"
+    },
+    {
+      "trait_type": "Hair",
+      "value": "Buzzcut"
+    },
+    {
+      "trait_type": "Eyes",
+      "value": "Closed"
+    },
+    {
+      "trait_type": "Clothing",
+      "value": "Bloody Three Piece"
+    },
+    {
+      "trait_type": "Background",
+      "value": "Grey"
+    }
+  ],
+  "properties": {
+    "category": "image",
+    "collection": {
+      "name": "Test Collection",
+      "family": "FAMI1"
+    },
+    "creators": [
+      {
+        "address": "3dTR6xHyk7D2dpRKjGi6C4TvxqLi4era747TdTevdSYj",
+        "share": 100
+      }
+    ]
+  }
 }

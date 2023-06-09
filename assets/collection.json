@@ -1,13 +1,13 @@
 {
-  "name": "Test Collection Name",
+  "name": "Test Collection",
   "symbol": "TESTC",
   "description": "Test Collection Description",
   "seller_fee_basis_points": 750,
   "image": "https://images.squarespace-cdn.com/content/v1/5336f9ebe4b00209e20806c1/1604069548152-VXQI49220L29NBADWQGM/logo.jpg",
   "external_url": "https://example.com",
   "collection": {
-    "name": "Test Collection Name 2",
-    "family": "FAMI"
+    "name": "Test Collection",
+    "family": "FAMI1"
   },
   "attributes": [],
   "properties": {
