@@ -6,7 +6,11 @@ import {
   bundlrStorage,
   token,
 } from "@metaplex-foundation/js";
-import { clusterApiUrl, Connection, PublicKey } from "@solana/web3.js";
+import {
+  clusterApiUrl,
+  Connection,
+  PublicKey,
+} from "@solana/web3.js";
 import { useState } from "react";
 import { walletAdapterIdentity } from "@metaplex-foundation/js";
 
@@ -39,8 +43,12 @@ export default function Home() {
 
   const airDrop = async () => {
     // const connection = new Connection(clusterApiUrl("mainnet-beta"));
-    const connection = new Connection("https://api.metaplex.solana.com/");
-    const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
+    const connection = new Connection(
+      "https://api.metaplex.solana.com/"
+    );
+    const mx = Metaplex.make(connection).use(
+      walletAdapterIdentity(wallet)
+    );
     const t1 = await mx
       .nfts()
       .builders()
@@ -82,7 +90,8 @@ export default function Home() {
     //   (await connection.getLatestBlockhash()).blockhash
     // );
 
-    const blockhash = (await connection.getLatestBlockhash()).blockhash;
+    const blockhash = (await connection.getLatestBlockhash())
+      .blockhash;
 
     // const signed = await wallet.signAllTransactions([
     //   t1.toTransaction({ blockhash }),
@@ -136,9 +145,8 @@ export default function Home() {
         return tx;
       });
 
-    const transactionsSignedByWallet = await wallet.signAllTransactions(
-      transactionsSignedByKeypair
-    );
+    const transactionsSignedByWallet =
+      await wallet.signAllTransactions(transactionsSignedByKeypair);
 
     const promises = transactionsSignedByWallet.map((tx) =>
       connection.sendRawTransaction(tx.serialize())
@@ -203,20 +211,28 @@ export default function Home() {
   };
 
   async function createCollection() {
-    const connection = new Connection("https://api.metaplex.solana.com/");
-    const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
-    const createResult = await mx.nfts().builders().create({
+    const connection = new Connection(
+      "https://api.metaplex.solana.com/"
+    );
+    const mx = Metaplex.make(connection).use(
+      walletAdapterIdentity(wallet)
+    );
+    const createResult = await mx.nfts().create({
       uri: "https://raw.githubusercontent.com/Pantheon-Studios/create-nft-solana/main/assets/collection.json",
       isCollection: true,
-      name: "Test Collection",
+      name: "r3cycle",
       sellerFeeBasisPoints: 750,
     });
     console.log("create coollection result", createResult);
   }
 
   async function verify() {
-    const connection = new Connection("https://api.metaplex.solana.com/");
-    const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
+    const connection = new Connection(
+      "https://api.metaplex.solana.com/"
+    );
+    const mx = Metaplex.make(connection).use(
+      walletAdapterIdentity(wallet)
+    );
     const verifyResult = await mx.nfts().verifyCollection({
       collectionMintAddress: collection,
       mintAddress: new PublicKey(
@@ -239,7 +255,9 @@ export default function Home() {
             {wallet.connected ? (
               <>
                 <button onClick={airDrop}>AirDrop</button>
-                <button onClick={createCollection}>Create Collection</button>
+                <button onClick={createCollection}>
+                  Create Collection
+                </button>
                 <button onClick={verify}>verify</button>
               </>
             ) : (
