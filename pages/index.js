@@ -21,6 +21,18 @@ const collection = new PublicKey(
   "D9vMrcwxYEzzL29m6AAnsQ8Mdn614ya6AqyefkDq7Do9" // test collection
 );
 
+function mergeTransactions(txs, blockhash) {
+  const t = txs[0].toTransaction({
+    blockhash,
+  });
+  txs.slice(1).forEach((tx) => {
+    tx.toTransaction({ blockhash }).instructions.forEach((ix) => {
+      t.add(ix);
+    });
+  });
+  return t;
+}
+
 export default function Home() {
   const [nft, setNft] = useState(null);
   const wallet = useWallet();
@@ -29,29 +41,142 @@ export default function Home() {
     // const connection = new Connection(clusterApiUrl("mainnet-beta"));
     const connection = new Connection("https://api.metaplex.solana.com/");
     const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
-    const createResult = await mx.nfts().create(
-      {
-        uri: "https://raw.githubusercontent.com/Pantheon-Studios/create-nft-solana/main/assets/nft.json",
-        name: "Test NFT #1",
-        sellerFeeBasisPoints: 750,
-        tokenStandard: TokenStandard.ProgrammableNonFungible,
-        tokenOwner: new PublicKey(
-          // "2Ne1qr6SxgVciCDHk2p2DZYXYGNvVLqhncPTuSu3CSHa" // teri
-          "3dTR6xHyk7D2dpRKjGi6C4TvxqLi4era747TdTevdSYj" // marti
-        ),
-        collection: collection,
-      },
-      { commitment: "finalized" }
+    const t1 = await mx
+      .nfts()
+      .builders()
+      .create(
+        {
+          uri: "https://raw.githubusercontent.com/Pantheon-Studios/create-nft-solana/main/assets/nft.json",
+          name: "Test NFT #1",
+          sellerFeeBasisPoints: 750,
+          tokenStandard: TokenStandard.ProgrammableNonFungible,
+          tokenOwner: new PublicKey(
+            "2Ne1qr6SxgVciCDHk2p2DZYXYGNvVLqhncPTuSu3CSHa" // teri
+            // "3dTR6xHyk7D2dpRKjGi6C4TvxqLi4era747TdTevdSYj" // marti
+          ),
+          collection: collection,
+        },
+        { commitment: "finalized" }
+      );
+
+    const t2 = await mx
+      .nfts()
+      .builders()
+      .create(
+        {
+          uri: "https://raw.githubusercontent.com/Coding-and-Crypto/Rust-Solana-Tutorial/master/nfts/mint-nft/assets/example.json",
+          name: "Test NFT #2",
+          sellerFeeBasisPoints: 750,
+          tokenStandard: TokenStandard.ProgrammableNonFungible,
+          tokenOwner: new PublicKey(
+            // "2Ne1qr6SxgVciCDHk2p2DZYXYGNvVLqhncPTuSu3CSHa" // teri
+            "3dTR6xHyk7D2dpRKjGi6C4TvxqLi4era747TdTevdSYj" // marti
+          ),
+          collection: collection,
+        },
+        { commitment: "finalized" }
+      );
+
+    // const merged = mergeTransactions(
+    //   [t1, t2],
+    //   (await connection.getLatestBlockhash()).blockhash
+    // );
+
+    const blockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    // const signed = await wallet.signAllTransactions([
+    //   t1.toTransaction({ blockhash }),
+    //   t2.toTransaction({ blockhash }),
+    // ]);
+
+    // const signed = [
+    //   await wallet.signTransaction(t1.toTransaction({ blockhash })),
+    //   await wallet.signTransaction(t2.toTransaction({ blockhash })),
+    // ];
+
+    // console.log(signed);
+
+    // const promises = signed.map((tx) =>
+    //   connection.sendRawTransaction(tx.serialize())
+    // );
+    // const results = await Promise.all(promises);
+
+    // console.log("results", results);
+
+    // console.log(wallet.publicKey.toString());
+
+    // const tokenSinger = t1.getSigners()[2];
+
+    // t1.feePayer = wallet.publicKey;
+    // t1.recentBlockhash = blockhash;
+    // t1.sign(tokenSinger);
+
+    // const signedTx = await wallet.signTransaction(t1.toTransaction());
+
+    // const txResult = await connection.sendRawTransaction(signedTx.serialize());
+    // console.log(txResult);
+
+    // works
+    // await metaplex.rpc().sendAndConfirmTransaction(transactionBuilder);
+
+    // const signedTx = await mx
+    //   .identity()
+    //   .signTransaction(t1.toTransaction({ blockhash }));
+
+    const transactionBuilders = [t1, t2];
+
+    const transactionsSignedByKeypair = transactionBuilders
+      .map((tx) => tx.toTransaction({ blockhash }))
+      .map((tx, i) => {
+        for (const signer of transactionBuilders[i].getSigners()) {
+          if (signer._keypair) {
+            tx.partialSign(signer);
+          }
+        }
+        return tx;
+      });
+
+    const transactionsSignedByWallet = await wallet.signAllTransactions(
+      transactionsSignedByKeypair
     );
 
-    console.log("create result", createResult);
+    const promises = transactionsSignedByWallet.map((tx) =>
+      connection.sendRawTransaction(tx.serialize())
+    );
 
-    const verifyResult = await mx.nfts().verifyCollection({
-      collectionMintAddress: collection,
-      mintAddress: createResult.nft.mint.address,
-    });
+    const results = await Promise.allSettled(promises);
 
-    console.log("verify result", verifyResult);
+    console.log("results", results);
+
+    // ---
+    // works
+    // let tx = t1.toTransaction({ blockhash });
+    // console.log("tx", tx);
+    // for (const signer of t1.getSigners()) {
+    //   if (signer._keypair) {
+    //     tx.partialSign(signer);
+    //   }
+    //   console.log("signer", signer);
+    //   console.log("tx", tx);
+    // }
+    // tx = await wallet.signTransaction(tx);
+
+    // console.log(t1);
+    // const txResult = await connection.sendRawTransaction(tx.serialize());
+
+    // console.log("txresuykt", txResult);
+    // ---
+
+    // await wallet.sendTransaction(t1.toTransaction({ blockhash }), connection);
+
+    // console.log("create result", createResult);
+
+    // const verifyResult = await mx.nfts().verifyCollection({
+    //   collectionMintAddress: collection,
+    //   mintAddress: createResult.nft.mint.address,
+    // });
+
+    // console.log("verify result", verifyResult);
 
     // const mintResult = await mx.nfts().mint({
     //   nftOrSft: createResult.nft,
@@ -74,13 +199,13 @@ export default function Home() {
     //   sellerFeeBasisPoints: 0,
     // });
 
-    setNft(createResult.nft);
+    // setNft(createResult.nft);
   };
 
   async function createCollection() {
     const connection = new Connection("https://api.metaplex.solana.com/");
     const mx = Metaplex.make(connection).use(walletAdapterIdentity(wallet));
-    const createResult = await mx.nfts().create({
+    const createResult = await mx.nfts().builders().create({
       uri: "https://raw.githubusercontent.com/Pantheon-Studios/create-nft-solana/main/assets/collection.json",
       isCollection: true,
       name: "Test Collection",
