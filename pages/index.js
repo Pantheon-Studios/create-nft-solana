@@ -210,6 +210,37 @@ export default function Home() {
     // setNft(createResult.nft);
   };
 
+  async function updateCollection() {
+    // their address 55mQPP2GhjpEdhLc5G8bKLWykT2ff7gHDG5bVyvoPPAa
+    const connection = new Connection(
+      "https://api.metaplex.solana.com/"
+    );
+    const mx = Metaplex.make(connection).use(
+      walletAdapterIdentity(wallet)
+    );
+    const nft = await mx.nfts().findByMint({
+      mintAddress: new PublicKey(
+        "J2Kde4dWUTmPvcgXVs95v1sEtynf3BXd8Qv5Xw7e6BJT"
+      ),
+    });
+    const createResult = await mx.nfts().update({
+      nftOrSft: nft,
+      uri: "https://solana-airdrop.vercel.app/collection",
+      isCollection: true,
+      name: "r3cycle",
+      sellerFeeBasisPoints: 750,
+      creators: [
+        {
+          address: new PublicKey(
+            "55mQPP2GhjpEdhLc5G8bKLWykT2ff7gHDG5bVyvoPPAa"
+          ),
+          share: 100,
+        },
+      ],
+    });
+    console.log("create coollection result", createResult);
+  }
+
   async function createCollection() {
     const connection = new Connection(
       "https://api.metaplex.solana.com/"
@@ -259,6 +290,7 @@ export default function Home() {
                   Create Collection
                 </button>
                 <button onClick={verify}>verify</button>
+                <button onClick={updateCollection}>update </button>
               </>
             ) : (
               "Please connect first"
